@@ -1,0 +1,38 @@
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <a class="brand" [routerLink]="auth.homeUrl()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"></path>
+        <path d="M10 7v12" stroke-dasharray="2 2"></path>
+      </svg>
+      Support Desk
+    </a>
+
+    <nav class="top-nav" aria-label="Main">
+      <a routerLink="/my-tickets" routerLinkActive="on" ariaCurrentWhenActive="page">My tickets</a>
+      @if (auth.isStaff()) {
+        <a routerLink="/queue" routerLinkActive="on" ariaCurrentWhenActive="page">Queue</a>
+      }
+      @if (auth.hasRole('Admin')) {
+        <a routerLink="/admin" routerLinkActive="on" ariaCurrentWhenActive="page">Admin</a>
+      }
+    </nav>
+
+    <div class="top-user">
+      @if (devMode && devUsers().length) {
+        <label class="dev-switch">
+          <span>Dev login</span>
+          <select [value]="currentKey()" (change)="switchUser($any($event.target).value)">
+            @for (u of devUsers(); track u.key) {
+              <option [value]="u.key">{{ u.displayName }} · {{ rolesOf(u) }}</option>
+            }
+          </select>
+        </label>
+      } @else {
+        <span>{{ auth.me()?.displayName }}</span>
+      }
+      <button type="button" class="link-light" (click)="auth.signOut()">Sign out</button>
+    </div>
+  </div>
+</header>

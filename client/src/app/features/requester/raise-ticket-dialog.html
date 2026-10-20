@@ -1,0 +1,115 @@
+<dialog #dialog class="modal" aria-labelledby="raise-title" (close)="onClosed()">
+  <div class="dialog-head">
+    <h2 id="raise-title">Raise a ticket</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+        stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+    </button>
+  </div>
+  <p class="muted intro">
+    You'll get suggested steps to try first. If they don't fix it, a specialist takes over with everything you tried
+    already recorded.
+  </p>
+
+  @if (error()) {
+    <p class="notice notice-error" role="alert">{{ error() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label class="field">
+      What's the problem?
+      <input class="input" type="text" formControlName="title" placeholder="e.g. VPN disconnects every few minutes"
+        [attr.aria-invalid]="showError('title')" />
+      @if (showError('title')) {
+        <span class="error-text">Give your ticket a short title.</span>
+      }
+    </label>
+
+    <div class="field">
+      <div class="label-row">
+        <label for="category">Category</label>
+        @if (!adding()) {
+          <button type="button" class="btn-link" (click)="startAdd()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            Add category
+          </button>
+        }
+      </div>
+      <select id="category" class="input" formControlName="categoryId">
+        @for (c of categories(); track c.id) {
+          <option [value]="c.id">{{ c.name }}</option>
+        }
+      </select>
+
+      @if (adding()) {
+        <div class="add-category">
+          <label for="new-category" class="small-label">New category name</label>
+          <div class="add-row">
+            <input id="new-category" class="input" type="text" maxlength="100" placeholder="e.g. Printing & scanning"
+              [value]="draft()" (input)="draft.set($any($event.target).value)" (keydown.enter)="$event.preventDefault(); addCategory()" />
+            <button type="button" class="btn" (click)="cancelAdd()">Cancel</button>
+            <button type="button" class="btn btn-primary" [disabled]="!canAdd() || addingBusy()" (click)="addCategory()">Add</button>
+          </div>
+
+          @if (duplicate(); as existing) {
+            <div class="notice notice-warn dup" role="status">
+              <span><strong>{{ existing.name }}</strong> already exists.</span>
+              <button type="button" class="btn-link" (click)="useCategory(existing)">Use {{ existing.name }}</button>
+            </div>
+          }
+          @if (similar().length) {
+            <div class="similar">
+              <span class="small-label">Did you mean one of these?</span>
+              <div class="pills">
+                @for (s of similar(); track s.id) {
+                  <button type="button" class="pill" (click)="useCategory(s)">{{ s.name }}</button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="field-row">
+      <label class="field">
+        Priority
+        <select class="input" formControlName="priority">
+          @for (p of priorities; track p) {
+            <option [value]="p">{{ p }}</option>
+          }
+        </select>
+        <span class="hint">How soon do you need it fixed?</span>
+      </label>
+      <label class="field">
+        Severity
+        <select class="input" formControlName="severity">
+          @for (s of severities; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+          }
+        </select>
+        <span class="hint">How much is it affecting work?</span>
+      </label>
+    </div>
+
+    <label class="field">
+      Describe what happens
+      <textarea class="input" rows="4" formControlName="description"
+        placeholder="What were you doing, what did you expect, and what happened instead?"
+        [attr.aria-invalid]="showError('description')"></textarea>
+      @if (showError('description')) {
+        <span class="error-text">Describe the problem so we can help.</span>
+      }
+    </label>
+
+    <p class="muted privacy">Don't include passwords. Personal details are removed before the assistant reads your ticket.</p>
+
+    <div class="actions">
+      <button type="button" class="btn" (click)="close()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+        {{ submitting() ? 'Creating…' : 'Create ticket and get suggestions' }}
+      </button>
+    </div>
+  </form>
+</dialog>

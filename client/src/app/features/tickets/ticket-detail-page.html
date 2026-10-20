@@ -1,0 +1,106 @@
+<main class="page">
+  @switch (state()) {
+    @case ('loading') {
+      <p class="muted">Loading ticket…</p>
+    }
+    @case ('not-found') {
+      <h1>Ticket not found</h1>
+      <p class="muted">It may not exist, or you may not have access to it.</p>
+      <a [routerLink]="auth.homeUrl()">Back to your tickets</a>
+    }
+    @case ('error') {
+      <p class="notice notice-error" role="alert">Could not load this ticket. Try again in a moment.</p>
+    }
+    @case ('ready') {
+      @if (ticket(); as t) {
+        <nav aria-label="Breadcrumb" class="crumbs">
+          <a [routerLink]="backLink()">{{ backLink() === '/queue' ? 'Queue' : 'My tickets' }}</a>
+          <span class="muted"> / {{ t.number }}</span>
+        </nav>
+
+        <div class="meta-row">
+          <app-ticket-number [number]="t.number" [origin]="t.origin" />
+          <app-status-chip [status]="t.status" />
+          <span class="muted small">{{ t.priority }} priority · {{ t.severity }} severity · {{ t.categoryName }} ·
+            Opened {{ t.createdAt | date: 'd MMM y, HH:mm' }}</span>
+        </div>
+        <h1 class="title">{{ t.title }}</h1>
+
+        <div class="layout">
+          <div class="main">
+            <section class="card card-pad" aria-labelledby="conv-title">
+              <h2 id="conv-title">Conversation</h2>
+              <ol class="thread">
+                <li class="message">
+                  <span class="avatar" aria-hidden="true">{{ initials(t.requesterName) }}</span>
+                  <div>
+                    <div class="small"><strong>{{ t.requesterName }}</strong>
+                      <span class="muted"> · {{ t.createdAt | date: 'd MMM, HH:mm' }} · original description</span></div>
+                    <p class="body">{{ t.description }}</p>
+                  </div>
+                </li>
+                @for (c of t.comments; track c.id) {
+                  <li class="message" [class.internal]="c.isInternal">
+                    <span class="avatar" aria-hidden="true">{{ initials(c.authorName) }}</span>
+                    <div>
+                      <div class="small author">
+                        <strong>{{ c.authorName }}</strong>
+                        <span class="muted">· {{ c.createdAt | date: 'd MMM, HH:mm' }}</span>
+                        @if (c.isInternal) {
+                          <span class="chip chip-internal">Internal note · requester can't see this</span>
+                        }
+                      </div>
+                      <p class="body">{{ c.body }}</p>
+                    </div>
+                  </li>
+                }
+              </ol>
+
+              <form class="composer" (ngSubmit)="post()">
+                @if (auth.isStaff()) {
+                  <fieldset class="kind">
+                    <legend class="sr-only">Message type</legend>
+                    <label><input type="radio" name="kind" [checked]="!internal()" (change)="internal.set(false)" /> Reply to requester</label>
+                    <label><input type="radio" name="kind" [checked]="internal()" (change)="internal.set(true)" /> Internal note</label>
+                  </fieldset>
+                }
+                <label for="comment" class="field">{{ internal() && auth.isStaff() ? 'Internal note' : 'Add a comment' }}</label>
+                <textarea id="comment" class="input" rows="3" [formControl]="comment"
+                  [placeholder]="internal() && auth.isStaff() ? 'Only specialists and admins will see this' : 'Anything else we should know?'"></textarea>
+                @if (postError()) {
+                  <p class="error-text" role="alert">{{ postError() }}</p>
+                }
+                <div class="composer-actions">
+                  <button type="submit" class="btn btn-primary" [disabled]="posting()">
+                    {{ internal() && auth.isStaff() ? 'Add internal note' : 'Post comment' }}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+
+          <aside class="side">
+            <section class="card card-pad" aria-labelledby="details-title">
+              <h2 id="details-title">Details</h2>
+              <dl>
+                <dt>Status</dt><dd><app-status-chip [status]="t.status" /></dd>
+                <dt>Raised by</dt><dd>{{ t.requesterName }}</dd>
+                <dt>Assigned to</dt>
+                <dd>
+                  @if (t.assignedGroupName) {
+                    {{ t.assignedUserName ? t.assignedUserName + ' · ' : '' }}{{ t.assignedGroupName }}
+                  } @else {
+                    <span class="muted">Not yet assigned</span>
+                  }
+                </dd>
+                <dt>Category</dt><dd>{{ t.categoryName }}</dd>
+                <dt>Priority</dt><dd>{{ t.priority }}</dd>
+                <dt>Severity</dt><dd>{{ t.severity }}</dd>
+              </dl>
+            </section>
+          </aside>
+        </div>
+      }
+    }
+  }
+</main>

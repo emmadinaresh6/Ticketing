@@ -1,0 +1,21 @@
+.dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dialog-head h2 { font-size: 22px; line-height: 1.3; }
+.dialog-head .icon-btn { margin: -8px -8px 0 0; }
+.intro { margin: 4px 0 20px; font-size: 14px; }
+form { display: flex; flex-direction: column; gap: 16px; }
+.label-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.add-category {
+  display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 8px;
+  background: var(--bg); font-weight: 400;
+}
+.small-label { font-size: 13px; font-weight: 600; }
+.add-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.add-row .input { flex: 1 1 220px; width: auto; }
+.dup { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 8px 12px; }
+.similar { display: flex; flex-direction: column; gap: 6px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.privacy { margin: 0; font-size: 13px; }
+.actions {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end;
+  padding-top: 12px; border-top: 1px solid var(--divider);
+}

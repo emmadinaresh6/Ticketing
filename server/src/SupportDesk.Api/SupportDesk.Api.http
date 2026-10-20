@@ -1,0 +1,62 @@
+@host = http://localhost:5299
+
+### Seeded dev users: dev-requester, dev-customer, dev-specialist, dev-admin
+GET {{host}}/api/dev/users
+
+### Sign in (copy accessToken into @token below)
+POST {{host}}/api/dev/login
+Content-Type: application/json
+
+{ "user": "dev-requester" }
+
+###
+@token = paste-access-token-here
+
+### Who am I
+GET {{host}}/api/me
+Authorization: Bearer {{token}}
+
+### Categories
+GET {{host}}/api/categories
+Authorization: Bearer {{token}}
+
+### Add a category (duplicate names return the existing one with 200)
+POST {{host}}/api/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Printing & scanning" }
+
+### Raise a ticket
+POST {{host}}/api/tickets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "VPN disconnects every few minutes",
+  "description": "Drops roughly every five minutes on home Wi-Fi.",
+  "categoryId": "30000000-0000-0000-0000-000000000001",
+  "priority": "Medium",
+  "severity": "Moderate"
+}
+
+### My tickets
+GET {{host}}/api/tickets
+Authorization: Bearer {{token}}
+
+### Ticket detail (404 if you cannot see it)
+GET {{host}}/api/tickets/{{ticketId}}
+Authorization: Bearer {{token}}
+
+### Comment (isInternal is staff only)
+POST {{host}}/api/tickets/{{ticketId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "body": "Still happening after a restart.", "isInternal": false }
+
+###
+@ticketId = paste-ticket-id-here
+
+### Health
+GET {{host}}/health
